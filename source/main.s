@@ -29,7 +29,7 @@ do:	ldr	r0, = numStudent
 	ldrb	r2, [r0]
 	sub	r2, #48			// r2 now stores num of students
 
-test:	cmp	r2, #1
+test:	cmp	r2, #1			// Test conditions
 	blt	error
 	cmp	r2, #9
 	bgt	error
