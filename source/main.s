@@ -12,12 +12,17 @@ main:
 	bl		InitUART    // Initialize the UART
 
 
-// You can use WriteStringUART and ReadLineUART functions here after the UART initializtion.
+	// You can use WriteStringUART and ReadLineUART functions here after the UART initializtion.
+
+	mov	r10, #10		// Constants to be used later
+	mov	r11, #100
+	
 	ldr	r0, = createdBy
 	mov	r1,#23
 	bl	WriteStringUART		// Print createdBy
 
-do:	ldr	r0, = numStudent
+nameCHK:
+	ldr	r0, = numStudent
 	mov	r1, #38
 	bl	WriteStringUART		// Print numStudent
 
@@ -29,24 +34,57 @@ do:	ldr	r0, = numStudent
 	ldrb	r2, [r0]		// ldrb - take ONE byte
 atoi:	sub	r2, #48		     	// r2 now stores num of students
 
-test:	cmp	r2, #1			// Test conditions
-	blt	error
+error1:
+	cmp	r2, #1
+	blt	errorINVS
 	cmp	r2, #9
-	bgt	error
+	bgt	errorINVS
 	b	Grades
 
-error:	ldr	r0, = invStudent	// Provide error msg upon invalid num
+errorINVS:
+	ldr	r0, = invStudent	// Provide error msg upon invalid num
 	mov	r1, #66
 	bl	WriteStringUART
-	b	do
+	b	nameCHK			// Branch back to nameCHK - user reenters data
 
-Grades:	ldr	r0, = totalSum
+Grades:	ldr	r0, = GradeStr
+	mov	r1, #36
+	bl	WriteStringUART		// Print question
+
+	add	r0, #4			// Offset address for next time *fingers crossed*
+
+	ldr	r0, = ABuff	        // Store address
+	mov	r1,#256		       	// Number of chars
+	bl	ReadLineUART		// ABuff now stores input
+
+
+	ldr	r0, = ABuff		// Continue once # b/w 1-9
+	ldrb	r5, [r0, #1]	
+	sub	r5, #48			// Contains the first digit
+	
+	ldrb	r6, [r0]		// Offset by 1 to capture byte @ 10th place
+	sub	r6, #48			// Contains the second digit
+	mla	r7, r6, r10, r5		// Need to multiply by 10: r7 = r6*r10 (#10) + r5 = 2 digit num
+	
+
+error2:
+	cmp	r7, #5			// *****Change afterwards******* to 1 and 100
+	blt	errorINVG
+	cmp	r7, #96
+	bgt	errorINVG
+	b	cont			// IF number is between 1-99, cont, else, print error msg
+
+errorINVG:
+	ldr	r0, = invNum
+	mov	r1, #62
+	bl	WriteStringUART
+	b	Grades
+	
+cont:	// HAVE MERCY ON US
+
+	ldr	r0, = totalSum
 	mov	r1, #12
 	bl	WriteStringUART
-
-	
-
-	
 
 haltLoop$:
 	b	haltLoop$
@@ -59,8 +97,8 @@ createdBy:  // Char: 23
 numStudent: // Char: 38
 	.ascii	"Please enter the number of students:\n\r"
 
-Grade:	    // Char: 34 per line.
-	.ascii	"Please enter the first grade:   \n\rPlease enter the second grade:  \n\rPlease enter the third grade:   \n\rPlease enter the fourth grade:  \n\rPlease enter the fifth grade:   \n\rPlease enter the sixth grade:   \n\rPlease enter the seventh grade: \n\rPlease enter the eighth grade:  \n\rPlease enter the ninth grade:   \n\r"
+GradeStr:   // Char: 36 per line.  OFFSET BY 9 BYTES EACH TIME
+	.ascii	"Please enter the first grade:     \n\rPlease enter the second grade:    \n\rPlease enter the third grade:     \n\rPlease enter the fourth grade:    \n\rPlease enter the fifth grade:     \n\rPlease enter the sixth grade:     \n\rPlease enter the seventh grade:   \n\rPlease enter the eighth grade:    \n\rPlease enter the ninth grade:     \n\r"
 
 wrongNum:   // Char: 22
 	.ascii	"Wrong number format!\n\r"

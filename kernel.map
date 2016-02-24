@@ -16,59 +16,59 @@ LOAD gpio.o
  .init          0x00008000        0x4 build/main.o
                 0x00008000                _start
 
-.data           0x00009080      0x323
+.data           0x00009080      0x335
  *(.data)
  .data          0x00009080        0x0 build/jtag.o
- .data          0x00009080      0x323 build/main.o
- .data          0x000093a3        0x0 uart.o
- .data          0x000093a3        0x0 gpio.o
+ .data          0x00009080      0x335 build/main.o
+ .data          0x000093b5        0x0 uart.o
+ .data          0x000093b5        0x0 gpio.o
  *.c.o(*)
 
-.igot.plt       0x000093a4        0x0
+.igot.plt       0x000093b8        0x0
  .igot.plt      0x00000000        0x0 build/jtag.o
 
-.text           0x000093a4      0x39c
+.text           0x000093b8      0x404
  *.c.o(.text)
  *(.text)
- .text          0x000093a4       0x8c build/jtag.o
-                0x000093a4                EnableJTAG
- .text          0x00009430       0x84 build/main.o
- .text          0x000094b4      0x1b4 uart.o
-                0x000094b4                InitUART
-                0x00009574                PutCharUART
-                0x00009590                GetCharUART
-                0x000095ac                WriteStringUART
-                0x000095d8                ReadLineUART
- .text          0x00009668       0xd8 gpio.o
-                0x00009668                GetGpioAddress
-                0x00009670                SetGpioFunction
-                0x000096bc                SetGpio
-                0x000096f8                GetGpio
+ .text          0x000093b8       0x8c build/jtag.o
+                0x000093b8                EnableJTAG
+ .text          0x00009444       0xec build/main.o
+ .text          0x00009530      0x1b4 uart.o
+                0x00009530                InitUART
+                0x000095f0                PutCharUART
+                0x0000960c                GetCharUART
+                0x00009628                WriteStringUART
+                0x00009654                ReadLineUART
+ .text          0x000096e4       0xd8 gpio.o
+                0x000096e4                GetGpioAddress
+                0x000096ec                SetGpioFunction
+                0x00009738                SetGpio
+                0x00009774                GetGpio
 OUTPUT(build/output.elf elf32-littlearm)
 
-.glue_7         0x00009740        0x0
+.glue_7         0x000097bc        0x0
  .glue_7        0x00000000        0x0 linker stubs
 
-.glue_7t        0x00009740        0x0
+.glue_7t        0x000097bc        0x0
  .glue_7t       0x00000000        0x0 linker stubs
 
-.vfp11_veneer   0x00009740        0x0
+.vfp11_veneer   0x000097bc        0x0
  .vfp11_veneer  0x00000000        0x0 linker stubs
 
-.v4_bx          0x00009740        0x0
+.v4_bx          0x000097bc        0x0
  .v4_bx         0x00000000        0x0 linker stubs
 
-.iplt           0x00009740        0x0
+.iplt           0x000097bc        0x0
  .iplt          0x00000000        0x0 build/jtag.o
 
-.rel.dyn        0x00009740        0x0
+.rel.dyn        0x000097bc        0x0
  .rel.iplt      0x00000000        0x0 build/jtag.o
 
-.bss            0x00009740        0x0
- .bss           0x00009740        0x0 build/jtag.o
- .bss           0x00009740        0x0 build/main.o
- .bss           0x00009740        0x0 uart.o
- .bss           0x00009740        0x0 gpio.o
+.bss            0x000097bc        0x0
+ .bss           0x000097bc        0x0 build/jtag.o
+ .bss           0x000097bc        0x0 build/main.o
+ .bss           0x000097bc        0x0 uart.o
+ .bss           0x000097bc        0x0 gpio.o
 
 .ARM.attributes
                 0x00000000       0x26
@@ -81,17 +81,17 @@ OUTPUT(build/output.elf elf32-littlearm)
  .ARM.attributes
                 0x00000072       0x26 gpio.o
 
-.debug_line     0x00000000      0x1fe
+.debug_line     0x00000000      0x21b
  .debug_line    0x00000000       0x61 build/jtag.o
- .debug_line    0x00000061       0x6e build/main.o
- .debug_line    0x000000cf       0xb6 uart.o
- .debug_line    0x00000185       0x79 gpio.o
+ .debug_line    0x00000061       0x8b build/main.o
+ .debug_line    0x000000ec       0xb6 uart.o
+ .debug_line    0x000001a2       0x79 gpio.o
 
-.debug_info     0x00000000      0x192
+.debug_info     0x00000000      0x198
  .debug_info    0x00000000       0x68 build/jtag.o
- .debug_info    0x00000068       0x64 build/main.o
- .debug_info    0x000000cc       0x63 uart.o
- .debug_info    0x0000012f       0x63 gpio.o
+ .debug_info    0x00000068       0x6a build/main.o
+ .debug_info    0x000000d2       0x63 uart.o
+ .debug_info    0x00000135       0x63 gpio.o
 
 .debug_abbrev   0x00000000       0x4e
  .debug_abbrev  0x00000000       0x14 build/jtag.o
