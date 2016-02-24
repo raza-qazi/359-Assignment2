@@ -3,7 +3,7 @@
 
 _start:
     b       main
-    
+
 .section .text
 
 main:
@@ -11,7 +11,7 @@ main:
 	bl		EnableJTAG  // Enable JTAG
 	bl		InitUART    // Initialize the UART
 
-	
+
 // You can use WriteStringUART and ReadLineUART functions here after the UART initializtion.
 	ldr	r0, = createdBy
 	mov	r1,#23
@@ -21,33 +21,37 @@ do:	ldr	r0, = numStudent
 	mov	r1, #38
 	bl	WriteStringUART		// Print numStudent
 
-	ldr	r0, = ABuff		// Store address
-	mov	r1,#1			// Number of chars
+	ldr	r0, = ABuff	        // Store address
+	mov	r1,#256		       	// Number of chars
 	bl	ReadLineUART		// ABuff now stores input
-	
+
 	ldr	r0, = ABuff
-	ldrb	r2, [r0]
-	sub	r2, #48			// r2 now stores num of students
+	ldrb	r2, [r0]		// ldrb - take ONE byte
+atoi:	sub	r2, #48		     	// r2 now stores num of students
 
 test:	cmp	r2, #1			// Test conditions
 	blt	error
 	cmp	r2, #9
 	bgt	error
-	b	cont	
+	b	Grades
 
-error:	ldr	r0, = invStudent
+error:	ldr	r0, = invStudent	// Provide error msg upon invalid num
 	mov	r1, #66
 	bl	WriteStringUART
 	b	do
 
-cont:	ldr	r0, = totalSum
+Grades:	ldr	r0, = totalSum
 	mov	r1, #12
-	bl	WriteStringUART		
+	bl	WriteStringUART
+
 	
+
+	
+
 haltLoop$:
 	b	haltLoop$
 
-.section .data  
+.section .data
 
 createdBy:  // Char: 23
 	.ascii	"Created By: Raza Qazi\n\r"
