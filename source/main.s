@@ -55,9 +55,7 @@ nameCHK:
 error1:
 	cmp	r2, #1
 	blt	errorINVS
-//      cmp	r2, #9                  // Redundant since bytes read == 1
-//	bgt	errorINVS
-	b	Grades
+	b	continue
 
 errorINVS:
 	ldr	r0, = invStudent	// Provide error msg upon invalid num
@@ -65,18 +63,17 @@ errorINVS:
 	bl	WriteStringUART
 	b	nameCHK			// Branch back to nameCHK - user reenters data
 
+continue:	
         mov     r4, #0                  // r4 stores iteration count
         ldr     r11, = GradeStr         // Setup address of GradeStr into r11 for use in loop
 // For loop begins here
-Grades:	cmp     r4, r2                  // while(i < numStudent)
+Loop:	
+	cmp     r4, r2                  // while(i < numStudent)
         bge     dispOutput              // Branch out of the loop if i >= numStudent
 
         mov     r0, r11                 // Updated GradeStr address in r0
 	mov	r1, #36
 	bl	WriteStringUART		// Print GradeStr for each iteration
-
-        mov     r11, r0
-	add	r11, #9			// Offset address for next Grade Q *fingers crossed*
 
         ldr	r0, = ABuff	        // Store address
 	mov	r1,#256		       	// Number of chars
@@ -84,38 +81,47 @@ Grades:	cmp     r4, r2                  // while(i < numStudent)
 
         // TODO - conditions to check if userInput is 1, 2, or 3 digits
         // Assuming 3 digits with the first two possibly zero [r0, #2] = Xxx, [r0, #1] = xXx, [r0] = xxX
-        ldrb    r7, [r0, #2]            // string at third place
+	ldr	r0, = ABuff	        // Store address back into r0
+        ldrb    r7, [r0, #2]            // string at first place
         ldrb    r6, [r0, #1]            // String at second place
-        ldrb    r5, [r0]                // String at the first place
-        cmp     r7, #0
-        bne     threeDigit              // If the digit at the third place is not zero, consider a three digit number
-        cmp     r6, #0
-        bne     twoDigit
-        // ----
+        ldrb    r5, [r0]                // String at third place
 
-	ldr	r0, = ABuff		// Continue once # b/w 1-9
-	ldrb	r5, [r0, #1]
-	sub	r5, #48			// Contains the first digit
+	// From notes
+	cmp	r5, #58			// is it any ascii value beyond 9?
+	bge	wrongType		// If so, branch to errorMsg
+	cmp	r6, #58
+	bge	wrongType
+	cmp	r7, #58
+	bge 	wrongType
 
-	ldrb	r6, [r0]		// Offset by 1 to capture byte @ 10th place
-	sub	r6, #48			// Contains the second digit
-	mla	r7, r6, r10, r5		// Need to multiply by 10: r7 = r6*r10 (#10) + r5 = 2 digit num
+	cmp	r5, #0			// Is the digit at 3rd place 0?
+	beq	twoDigit		// Branch to the case where the number might be
+					// 2 digits in length
+	//
+	//
 
-error2:
-	cmp	r7, #1			// *****Change afterwards******* to 1 and 100
+	b	totalSum
+twoDigit:
+	cmp	r6, #0
+	beq	oneDigit
+
+	mla	r8, r6, r10, r5		// Need to multiply by 10: r7 = r6*r10 (#10) + r5 = 2 digit num
+
+	cmp	r7, #1			
 	blt	errorINVG
 	cmp	r7, #100
 	bgt	errorINVG
-	b	cont			// IF number is between 1-99, cont, else, print error msg
+	b	continue2			// IF number is between 1-99, cont, else, print error msg
 
 errorINVG:
-	ldr	r0, = invNum
+	ldr	r0, = invNum		// Not between 1 and 100
 	mov	r1, #62
 	bl	WriteStringUART
-	b	Grades
-
+	b	Loop
+continue2:
+	add	r11, #0x24		// Offset address for next Grade Question - Will only happen if the number inputted is correct
         add     r4, #1                  // i++
-        b       Grades                  // Go to top of the loop
+        b       Loop                    // Go to top of the loop
 
 dispOutput:                     	// HAVE MERCY ON US
 
