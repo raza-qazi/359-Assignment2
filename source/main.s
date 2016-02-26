@@ -23,6 +23,8 @@ _start:
         r9 - totalSum
         r10 - Constant 10
         r11 - stores address of Grade string
+        r12 - Constant 0
+        r13 - averageStorage
         tbc'd
 */
 
@@ -33,7 +35,8 @@ main:
 
 	// You can use WriteStringUART and ReadLineUART functions here after the UART initializtion.
 
-	mov	r10, #10		// Constant to be used later
+	mov	r10, #10		// Constant 10
+        mov     r12, #0                 // Constant 0
 
 	ldr	r0, = createdBy
 	mov	r1, #23
@@ -67,10 +70,16 @@ continue:
         ldr     r11, = GradeStr         // Setup address of GradeStr into r11 for use in loop
 
         mov     r9, #0                  // totalSum = 0
+        mov     r13, #0                 // Average counter
 // For loop begins here
 Loop:
 	cmp     r4, r2                  // while(i < numStudent)
         bge     dispOutput              // Branch out of the loop if i >= numStudent
+
+        ldr     r0, = ABuff             // Preparing to reset
+        strb    r12, [r0, #2]           // Reset the buffer to zero
+        strb    r12, [r0, #1]           // ^ ^^ ^
+        strb    r12, [r0]               //  ^  ^
 
         mov     r8, #0                  // r8 is result
 
@@ -131,15 +140,12 @@ twoDigit:
 
 	mla	r8, r6, r10, r5		// Need to multiply by 10: r7 = r6*r10 (#10) + r5 = 2 digit num
                                         // No error check needed
-
         b       totalSum
-
 oneDigit:
         sub     r7, #48                 // Number as an int
 
         add     r8, r7
         b       totalSum
-
 wrongType:
         ldr     r0, = wrongNum
         mov     r1, #22
@@ -158,6 +164,15 @@ totalSum:
         add     r4, #1                  // i++
         b       Loop                    // Go to top of the loop
 
+        // Assuming total value is final
+avgCalc:
+        cmp     r13, #0                  // Doc
+        beq     dispOutput               //       
+        blt     decrement
+
+        sub
+
+        add     r4, #1
 dispOutput:                     	// HAVE MERCY ON US
 
 	ldr	r0, = totalSumStr
