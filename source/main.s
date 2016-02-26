@@ -13,8 +13,7 @@ _start:
 
 /*      r0 - reserved for addresses
         r1 - reserved for byte size
-        r2 - number of students
-        r3 - placeholder
+        r3 - number of students
         r4 - iteration count
         r5 - digit at first place
         r6 - digit at second place
@@ -43,7 +42,7 @@ main:
 	bl	WriteStringUART		// Print createdBy
 
 nameCHK:
-	ldr	r0, = numStudent
+	ldr	r0,= numStudent
 	mov	r1, #39
 	bl	WriteStringUART		// Print numStudent
 
@@ -52,8 +51,8 @@ nameCHK:
 	bl	ReadLineUART		// ABuff now stores input
 
 	ldr	r0, = ABuff
-	ldrb	r2, [r0]		// ldrb - take ONE byte
-	sub	r2, #48		     	// r2 now stores num of students
+	ldrb	r3, [r0]		// ldrb - take ONE byte
+	sub	r3, #48		     	// r2 now stores num of students
 
 	cmp	r2, #1
 	blt	errorINVS
@@ -73,8 +72,8 @@ continue:
         mov     r13, #0                 // Average counter
 // For loop begins here
 Loop:
-	cmp     r4, r2                  // while(i < numStudent)
-        bge     dispOutput              // Branch out of the loop if i >= numStudent
+	cmp     r4, r3                  // while(i < numStudent)
+        bge     continue2               // Branch out of the loop if i >= numStudent
 
         ldr     r0, = ABuff             // Preparing to reset
         strb    r12, [r0, #2]           // Reset the buffer to zero
@@ -83,9 +82,6 @@ Loop:
 
         mov     r8, #0                  // r8 is result
 
-        ldr     r0, = newLine
-        mov     r1, #2
-        bl      WriteStringUART         // Print on new line
 
         mov     r0, r11                 // Updated GradeStr address in r0
 	mov	r1, #36
@@ -101,7 +97,7 @@ Loop:
         ldrb    r7, [r0, #2]            // string at first place
         ldrb    r6, [r0, #1]            // String at second place
         ldrb    r5, [r0]                // String at third place
-
+test2:
 	// From notes
 	cmp	r5, #58			// is it any ascii value beyond 9?
 	bge	wrongType		// If so, branch to errorMsg
@@ -110,7 +106,7 @@ Loop:
 	cmp	r7, #58
 	bge 	wrongType
 
-	cmp	r5, #0			// Is the digit at 3rd place 0?
+	cmp	r7, #0			// Is the digit at 3rd place 0?
 	beq	twoDigit		// Branch to the case where the number might be
 					// 2 digits in length
         // Create the three digit number
@@ -118,9 +114,11 @@ Loop:
         sub     r6, #48                 // Number as an int
         sub     r7, #48                 // Number as an int
 
-        add     r8, r7                  // r8 = r8 (0) + firstDigit
+test:	add     r8, r7                  // r8 = r8 (0) + firstDigit
+	mov	r10, #10		// Constant 10
         mul     r6, r10                 // r6 = r6*10 - digit at 2nd place
         add     r8, r6                  // r8 = first digit + second digit
+	mov	r10, #10		// Constant 10
         mul     r5, r10
         mul     r5, r10                 // r5 = r5 * 100
         add     r8, r5                  // 3 digit num
@@ -132,13 +130,14 @@ Loop:
 
 	b	totalSum
 twoDigit:
-        sub     r6, #48                 // Number as an int
-        sub     r7, #48                 // Number as an int
-
-	cmp	r6, #0
+	cmp	r5, #0
 	beq	oneDigit
 
-	mla	r8, r6, r10, r5		// Need to multiply by 10: r7 = r6*r10 (#10) + r5 = 2 digit num
+	sub     r5, #48                 // Number as an int
+        sub     r6, #48                 // Number as an int
+
+	mov	r10, #10		// Constant 10
+	mla	r8, r5, r10, r6		// Need to multiply by 10: r7 = r6*r10 (#10) + r5 = 2 digit num
                                         // No error check needed
         b       totalSum
 oneDigit:
@@ -165,14 +164,26 @@ totalSum:
         b       Loop                    // Go to top of the loop
 
         // Assuming total value is final
+continue2:
+	mov	r0, r9			// Temp value to store total sum
+	mov	r10, r2			// temp to store numstudent
+	mov	r4, #0			// increment i
+
 avgCalc:
-        cmp     r13, #0                  // Doc
-        beq     dispOutput               //       
+        cmp     r0, #0                  // Doc
+        beq     dispOutput	                 //
         blt     decrement
 
-        sub
+        sub	r0, r10			 // Subtract from total, numStudent
+					// Repeat until zero or less
 
-        add     r4, #1
+        add     r4, #1			// Count one each time
+
+	b	avgCalc			// Go to top and compare
+
+decrement:				// Applicable if the divison is has a remainder
+	sub	r4, #1
+
 dispOutput:                     	// HAVE MERCY ON US
 
 	ldr	r0, = totalSumStr
@@ -208,7 +219,7 @@ totalSumStr:   // Char: 12
 totalAvg:   // Char: 16
 	.ascii	"The average is: "
 
-newLine:    // Char: 2
+newLineStr:    // Char: 2
 	.ascii	"\n\r"
 
 
