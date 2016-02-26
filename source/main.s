@@ -52,7 +52,6 @@ nameCHK:
 	ldrb	r2, [r0]		// ldrb - take ONE byte
 	sub	r2, #48		     	// r2 now stores num of students
 
-error1:
 	cmp	r2, #1
 	blt	errorINVS
 	b	continue
@@ -74,6 +73,11 @@ Loop:
         bge     dispOutput              // Branch out of the loop if i >= numStudent
 
         mov     r8, #0                  // r8 is result
+
+        ldr     r0, = newLine
+        mov     r1, #2
+        bl      WriteStringUART         // Print on new line
+
         mov     r0, r11                 // Updated GradeStr address in r0
 	mov	r1, #36
 	bl	WriteStringUART		// Print GradeStr for each iteration
@@ -83,7 +87,7 @@ Loop:
 	bl	ReadLineUART		// ABuff now stores input
 
         // TODO - conditions to check if userInput is 1, 2, or 3 digits
-        // Assuming 3 digits with the first two possibly zero [r0, #2] = Xxx, [r0, #1] = xXx, [r0] = xxX
+        // Assuming 3 digits with the first two possibly zero [r0] = Xxx, [r0, #1] = xXx, [r0, #2] = xxX
 	ldr	r0, = ABuff	        // Store address back into r0
         ldrb    r7, [r0, #2]            // string at first place
         ldrb    r6, [r0, #1]            // String at second place
@@ -119,6 +123,9 @@ Loop:
 
 	b	totalSum
 twoDigit:
+        sub     r6, #48                 // Number as an int
+        sub     r7, #48                 // Number as an int
+
 	cmp	r6, #0
 	beq	oneDigit
 
@@ -128,6 +135,8 @@ twoDigit:
         b       totalSum
 
 oneDigit:
+        sub     r7, #48                 // Number as an int
+
         add     r8, r7
         b       totalSum
 
@@ -166,7 +175,7 @@ createdBy:  // Char: 23
 numStudent: // Char: 39
 	.ascii	"Please enter the number of students:\n\r>"
 
-GradeStr:   // Char: 36 per line.  OFFSET BY 9*4 BYTES EACH TIME
+GradeStr:   // Char: 36 per line.  OFFSET BY 9*4 BYTES EACH TIME - 0x24
 	.ascii	"Please enter the first grade:     \n\rPlease enter the second grade:    \n\rPlease enter the third grade:     \n\rPlease enter the fourth grade:    \n\rPlease enter the fifth grade:     \n\rPlease enter the sixth grade:     \n\rPlease enter the seventh grade:   \n\rPlease enter the eighth grade:    \n\rPlease enter the ninth grade:     \n\r"
 
 wrongNum:   // Char: 22
