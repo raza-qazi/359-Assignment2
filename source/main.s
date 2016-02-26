@@ -151,7 +151,7 @@ totalSum:
 
 dispOutput:                     	// HAVE MERCY ON US
 
-	ldr	r0, = totalSum
+	ldr	r0, = totalSumStr
 	mov	r1, #12
 	bl	WriteStringUART
 
@@ -178,7 +178,7 @@ invNum:     // Char: 62
 invStudent: // Char: 66
 	.ascii	"Invalid number! The number of students should be between 1 and 9\n\r"
 
-totalSum:   // Char: 12
+totalSumStr:   // Char: 12
 	.ascii	"The sum is: "
 
 totalAvg:   // Char: 16
