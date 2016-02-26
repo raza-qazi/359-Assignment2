@@ -41,7 +41,7 @@ main:
 
 nameCHK:
 	ldr	r0, = numStudent
-	mov	r1, #38
+	mov	r1, #39
 	bl	WriteStringUART		// Print numStudent
 
 	ldr	r0, = ABuff	        // Store address
@@ -63,14 +63,17 @@ errorINVS:
 	bl	WriteStringUART
 	b	nameCHK			// Branch back to nameCHK - user reenters data
 
-continue:	
+continue:
         mov     r4, #0                  // r4 stores iteration count
         ldr     r11, = GradeStr         // Setup address of GradeStr into r11 for use in loop
+
+        mov     r9, #0                  // totalSum = 0
 // For loop begins here
-Loop:	
+Loop:
 	cmp     r4, r2                  // while(i < numStudent)
         bge     dispOutput              // Branch out of the loop if i >= numStudent
 
+        mov     r8, #0                  // r8 is result
         mov     r0, r11                 // Updated GradeStr address in r0
 	mov	r1, #36
 	bl	WriteStringUART		// Print GradeStr for each iteration
@@ -97,8 +100,22 @@ Loop:
 	cmp	r5, #0			// Is the digit at 3rd place 0?
 	beq	twoDigit		// Branch to the case where the number might be
 					// 2 digits in length
-	//
-	//
+        // Create the three digit number
+        sub     r5, #48                 // Number as an int
+        sub     r6, #48                 // Number as an int
+        sub     r7, #48                 // Number as an int
+
+        add     r8, r7                  // r8 = r8 (0) + firstDigit
+        mul     r6, r10                 // r6 = r6*10 - digit at 2nd place
+        add     r8, r6                  // r8 = first digit + second digit
+        mul     r5, r10
+        mul     r5, r10                 // r5 = r5 * 100
+        add     r8, r5                  // 3 digit num
+
+        cmp	r8, #0
+        blt	errorINVG
+        cmp	r8, #100
+        bgt	errorINVG
 
 	b	totalSum
 twoDigit:
@@ -106,19 +123,28 @@ twoDigit:
 	beq	oneDigit
 
 	mla	r8, r6, r10, r5		// Need to multiply by 10: r7 = r6*r10 (#10) + r5 = 2 digit num
+                                        // No error check needed
 
-	cmp	r7, #1			
-	blt	errorINVG
-	cmp	r7, #100
-	bgt	errorINVG
-	b	continue2			// IF number is between 1-99, cont, else, print error msg
+        b       totalSum
+
+oneDigit:
+        add     r8, r7
+        b       totalSum
+
+wrongType:
+        ldr     r0, = wrongNum
+        mov     r1, #22
+        bl      WriteStringUART
+        b       Loop
 
 errorINVG:
 	ldr	r0, = invNum		// Not between 1 and 100
 	mov	r1, #62
 	bl	WriteStringUART
 	b	Loop
-continue2:
+
+totalSum:
+        add     r9, r8                  // Add value in current iteration to total grade
 	add	r11, #0x24		// Offset address for next Grade Question - Will only happen if the number inputted is correct
         add     r4, #1                  // i++
         b       Loop                    // Go to top of the loop
@@ -137,8 +163,8 @@ haltLoop$:
 createdBy:  // Char: 23
 	.ascii	"Created By: Raza Qazi\n\r"
 
-numStudent: // Char: 38
-	.ascii	"Please enter the number of students:\n\r"
+numStudent: // Char: 39
+	.ascii	"Please enter the number of students:\n\r>"
 
 GradeStr:   // Char: 36 per line.  OFFSET BY 9*4 BYTES EACH TIME
 	.ascii	"Please enter the first grade:     \n\rPlease enter the second grade:    \n\rPlease enter the third grade:     \n\rPlease enter the fourth grade:    \n\rPlease enter the fifth grade:     \n\rPlease enter the sixth grade:     \n\rPlease enter the seventh grade:   \n\rPlease enter the eighth grade:    \n\rPlease enter the ninth grade:     \n\r"
