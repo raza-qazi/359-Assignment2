@@ -91,7 +91,12 @@ Loop:
 	mov	r1,#256		       	// Number of chars
 	bl	ReadLineUART		// ABuff now stores input
 
-        // TODO - conditions to check if userInput is 1, 2, or 3 digits
+        // At this point, r0 contains the length of the input
+        cmp     r0, #3
+        bgt     errorINVG
+
+        cmp     r0, #0
+        beq     errorINVG
         // Assuming 3 digits with the first two possibly zero [r0] = Xxx, [r0, #1] = xXx, [r0, #2] = xxX
 	ldr	r0, = ABuff	        // Store address back into r0
         ldrb    r7, [r0, #2]            // string at first place
@@ -184,7 +189,7 @@ avgCalc:
 decrement:				// Applicable if the divison is has a remainder
 	sub	r4, #1
 
-dispOutput:                     	// HAVE MERCY ON US
+dispOutput:
 
 	ldr	r0, = totalSumStr
 	mov	r1, #12
