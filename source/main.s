@@ -57,6 +57,10 @@ nameCHK:
 	ldr	r0, = ABuff
 	ldrb	r3, [r0]		// ldrb - take ONE byte
 
+        ldr     r0, = newLineStr        // Print newLineStr
+        mov     r1, #2
+        bl      WriteStringUART
+        
         cmp     r3, #48
         blt     errorINVS               // Special case: character NOT b/w 0-9
         cmp     r3, #58
@@ -64,15 +68,10 @@ nameCHK:
 
 	sub	r3, #48		     	// r3 now stores num of students
 
-        ldr     r0, = newLineStr        // Print newLineStr
-        mov     r1, #2
-        bl      WriteStringUART
-
         cmp     r0, #0                   // Special case: no input
         beq     errorINVS
 	cmp	r3, #0                   // Special case: numStudent = 0
 	beq	errorINVS
-
 
 	b	continue
 
@@ -117,75 +116,8 @@ Loop:
 
         cmp     r0, #0
         beq     errorINVG
-
-        // Assuming 3 digits with the first two possibly zero [r0]
-	ldr	r0, = ABuff	        // Store address back into r0
-        ldrb    r7, [r0, #2]            // string at first place
-        ldrb    r6, [r0, #1]            // String at second place
-        ldrb    r5, [r0]                // String at third place
-
-	// From notes
-	cmp	r5, #58			// is it any ascii value beyond 9?
-	bge	wrongType		// If so, branch to errorMsg
-	cmp	r6, #58
-	bge	wrongType
-	cmp	r7, #58
-	bge 	wrongType
-
-	cmp	r7, #0			// Is the digit at 3rd place 0?
-	beq	twoDigit		// Branch to the case where the number might be
-					// 2 digits in length
-        // Create the three digit number
-        sub     r5, #48                 // Number as an int
-        sub     r6, #48                 // Number as an int
-        sub     r7, #48                 // Number as an int
-
-	add     r8, r7                  // r8 = r8 (0) + firstDigit
-	mov	r10, #10		// Constant 10
-        mul     r6, r10                 // r6 = r6*10 - digit at 2nd place
-        add     r8, r6                  // r8 = first digit + second digit
-	mov	r10, #10		// Constant 10
-        mul     r5, r10
-        mul     r5, r10                 // r5 = r5 * 100
-        add     r8, r5                  // 3 digit num
-
-        cmp	r8, #0
-        blt	errorINVG
-        cmp	r8, #100
-        bgt	errorINVG
-
-	b	totalSum
-
-twoDigit:
-	cmp	r6, #0
-	beq	oneDigit
-
-	sub     r5, #48                 // Number as an int
-        sub     r6, #48                 // Number as an int
-
-	mov	r10, #10		// Constant 10
-	mla	r8, r5, r10, r6		// Need to multiply by 10: r7 = r6*r10 (#10) + r5 = 2 digit num
-                                        // No error check needed
-        b       totalSum
-
-oneDigit:
-        sub     r5, #48                 // Number as an int
-
-        add     r8, r5
-        b       totalSum
-
-wrongType:
-        ldr     r0, = wrongNum
-        mov     r1, #22
-        bl      WriteStringUART
-        b       Loop
-
-errorINVG:
-	ldr	r0, = invNum		// Not between 1 and 100
-	mov	r1, #62
-	bl	WriteStringUART
-	b	Loop
-
+        // *********************************************************
+        bl      atoi
 totalSum:
         add     r9, r8                  // Add value in current iteration to total grade
 	add	r11, #0x24		// Offset address for next Grade Question - Will only happen if the number inputted is correct
@@ -317,6 +249,80 @@ svOne:
         strb    r0, [r7]              // Stores 4
 cont:
         mov     pc, lr                 // Return
+
+        //---------------------------------------------------//
+
+atoi:   // Assuming 3 digits with the first two possibly zero [r0]
+	ldr	r0, = ABuff	        // Store address back into r0
+        ldrb    r7, [r0, #2]            // string at first place
+        ldrb    r6, [r0, #1]            // String at second place
+        ldrb    r5, [r0]                // String at third place
+
+	// From notes
+	cmp	r5, #58			// is there any ascii value beyond 9?
+	bge	wrongType		// If so, branch to errorMsg
+	cmp	r6, #58
+	bge	wrongType
+	cmp	r7, #58
+	bge 	wrongType
+
+	cmp	r7, #0			// Is the digit at 3rd place 0?
+	beq	twoDigit		// Branch to the case where the number might be
+					// 2 digits in length
+        // Create the three digit number
+        sub     r5, #48                 // Number as an int
+        sub     r6, #48                 // Number as an int
+        sub     r7, #48                 // Number as an int
+
+	add     r8, r7                  // r8 = r8 (0) + firstDigit
+	mov	r10, #10		// Constant 10
+        mul     r6, r10                 // r6 = r6*10 - digit at 2nd place
+        add     r8, r6                  // r8 = first digit + second digit
+	mov	r10, #10		// Constant 10
+        mul     r5, r10
+        mul     r5, r10                 // r5 = r5 * 100
+        add     r8, r5                  // 3 digit num
+
+        cmp	r8, #0
+        blt	errorINVG
+        cmp	r8, #100
+        bgt	errorINVG
+
+	b	totalSum
+
+twoDigit:
+	cmp	r6, #0
+	beq	oneDigit
+
+	sub     r5, #48                 // Number as an int
+        sub     r6, #48                 // Number as an int
+
+	mov	r10, #10		// Constant 10
+	mla	r8, r5, r10, r6		// Need to multiply by 10: r7 = r6*r10 (#10) + r5 = 2 digit num
+                                        // No error check needed
+        b       totalSum
+
+oneDigit:
+        sub     r5, #48                 // Number as an int
+
+        add     r8, r5
+        b       totalSum
+
+wrongType:
+        ldr     r0, = wrongNum
+        mov     r1, #22
+        bl      WriteStringUART
+        b       Loop
+
+errorINVG:
+	ldr	r0, = invNum		// Not between 1 and 100
+	mov	r1, #62
+	bl	WriteStringUART
+	b	Loop
+
+        mov     pc, lr
+
+// END SUBROUTINES
 
 .section .data
 
